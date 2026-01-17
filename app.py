@@ -650,7 +650,7 @@ if app_mode == "🗺️ 地図分析":
             <div style="grid-row:2; grid-column:1; writing-mode: vertical-rl; font-weight:bold; color:#666;">スコア高</div>
             
             <div style="grid-row:2; grid-column:2; background:#FFeee0; border:2px solid #FF8C00; border-radius:4px; padding:2px;">
-                <b style="color:#FF8C00; font-size:1.1em">A 重点</b><br>宝の山
+                <b style="color:#FF8C00; font-size:1.1em">A 重点</b><br>浮動票
             </div>
             <div style="grid-row:2; grid-column:3; background:#e0ffff; border:1px solid #00CED1; border-radius:4px; padding:2px;">
                 <b style="color:#008080;">B 激戦</b><br>組織壁
@@ -727,3 +727,4 @@ elif app_mode == "📊 データリスト":
             height=600
 
         )
+
