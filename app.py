@@ -7,8 +7,47 @@ import numpy as np
 import math
 import re
 
-# ページ設定
-st.set_page_config(layout="wide", page_title="Matsudo Strategy Map (Final Fixed)", page_icon="⚔️")
+# ▼▼▼▼▼▼ パスワード認証機能 ▼▼▼▼▼▼
+def check_password():
+    """パスワード認証が成功したらTrueを返す"""
+    if "password_correct" not in st.session_state:
+        st.session_state["password_correct"] = False
+
+    def password_entered():
+        # st.secrets からパスワードを読み込む（安全な方法）
+        if st.session_state["password"] == st.secrets["APP_PASSWORD"]:
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # 入力されたパスワードを削除
+        else:
+            st.session_state["password_correct"] = False
+
+    if st.session_state["password_correct"]:
+        return True
+
+    # まだ認証していない場合、入力画面を出す
+    st.set_page_config(page_title="ログイン", page_icon="🔒")
+    st.text_input(
+        "🔑 アクセスパスワードを入力してください", 
+        type="password", 
+        on_change=password_entered, 
+        key="password"
+    )
+    if "password_correct" in st.session_state and not st.session_state["password_correct"]:
+        st.error("パスワードが違います")
+    
+    return False
+
+# 認証チェック実行
+if not check_password():
+    st.stop() # パスワードが合わない限り、ここで処理を止める
+
+# ▲▲▲▲▲▲ ここまで追加 ▲▲▲▲▲▲
+
+# --- 以下、元のコード（set_page_configなど） ---
+# 注意: 元のコードにある st.set_page_config は削除するか、
+# check_password() の後に移動してください（Streamlitはset_page_configを一度しか呼べないため）
+
+
 
 # ---------------------------------------------------------
 # 0. ヘルパー関数
@@ -686,4 +725,5 @@ elif app_mode == "📊 データリスト":
                    .format({'総人口': '{:,}', 'ファミリー人口': '{:,}', '独身人口': '{:,}'}), 
             use_container_width=True, 
             height=600
+
         )
