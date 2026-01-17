@@ -225,6 +225,45 @@ def load_and_process_data():
             price_locations.append({'name': row['name'], 'price': row['Price/m^2'], 'lat': c.y, 'lon': c.x})
     df_prices_geocoded = pd.DataFrame(price_locations)
 
+# --- ここから挿入 ---
+    # 1. 全駅の座標を世界標準(WGS84)で強制固定（CSVのズレを完全に無視する）
+    station_data = {
+        '松戸駅': [35.784535, 139.900695],
+        '北松戸駅': [35.800532, 139.911037],
+        '馬橋駅': [35.811825, 139.917411],
+        '新松戸駅': [35.825200, 139.921000],
+        '北小金駅': [35.833500, 139.931500],
+        '東松戸駅': [35.770500, 139.944500],
+        '秋山駅': [35.764500, 139.929500],
+        '矢切駅': [35.756500, 139.899500],
+        '常盤平駅': [35.803000, 139.950500],
+        '五香駅': [35.800500, 139.967500],
+        'みのり台駅': [35.789500, 139.927000],
+        '上本郷駅': [35.793500, 139.918500],
+        '松飛台駅': [35.776500, 139.961500]
+    }
+    fixed_stations = []
+    for name, coords in station_data.items():
+        fixed_stations.append({'name': name, 'lat': coords[0], 'lon': coords[1]})
+    df_stations = pd.DataFrame(fixed_stations) # df_stationsを正確なデータで上書き
+
+    # 2. 地図データの重心（lat, lon）を抽出
+    gdf_merged['lat'] = gdf_merged.geometry.centroid.y
+    gdf_merged['lon'] = gdf_merged.geometry.centroid.x
+
+    # 3. 距離計算関数の定義（町丁字の重心から最寄り駅までの距離を計算）
+    def get_station_dist(row, stations_df):
+        dists = []
+        for _, s in stations_df.iterrows():
+            d_lat = (row['lat'] - s['lat']) * 111
+            d_lon = (row['lon'] - s['lon']) * 91
+            dists.append(math.sqrt(d_lat**2 + d_lon**2))
+        return min(dists) if dists else 999
+
+    # 4. 距離計算の実行
+    gdf_merged['dist_km'] = gdf_merged.apply(lambda r: get_station_dist(r, df_stations), axis=1)
+    # --- ここまで挿入 ---
+    
     return df_pop, df_stations, df_votes, gdf_merged, df_prices_geocoded
 
 try:
@@ -727,4 +766,5 @@ elif app_mode == "📊 データリスト":
             height=600
 
         )
+
 
